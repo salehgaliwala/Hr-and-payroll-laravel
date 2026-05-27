@@ -48,11 +48,14 @@ export default function EmployeeEdit() {
     emergency_contact_name: employee.employee?.emergency_contact_name || '',
     emergency_contact_relationship: employee.employee?.emergency_contact_relationship || '',
     emergency_contact_number: employee.employee?.emergency_contact_number || '',
+    banking_option: employee.employee?.banking_option || 'bank_account',
     bank_name: employee.employee?.bank_name || '',
     account_holder_name: employee.employee?.account_holder_name || '',
     account_number: employee.employee?.account_number || '',
     bank_identifier_code: employee.employee?.bank_identifier_code || '',
     bank_branch: employee.employee?.bank_branch || '',
+    wallet_provider: employee.employee?.wallet_provider || '',
+    wallet_phone: employee.employee?.wallet_phone || '',
     tax_payer_id: employee.employee?.tax_payer_id || '',
     salary: employee.employee?.base_salary || '',
     documents: []
@@ -757,70 +760,128 @@ export default function EmployeeEdit() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="bank_name" required>{t('Bank Name')}</Label>
-                <Input
-                  id="bank_name"
-                  value={formData.bank_name}
+                <Label htmlFor="banking_option" required>{t('Banking Option')}</Label>
+                <Select
+                  value={formData.banking_option}
                   required
-                  onChange={(e) => handleChange('bank_name', e.target.value)}
-                  placeholder={t('e.g. Bank of America')}
-                  className={errors.bank_name ? 'border-red-500' : ''}
-                />
-                {errors.bank_name && <p className="text-red-500 text-xs">{errors.bank_name}</p>}
+                  onValueChange={(value) => handleChange('banking_option', value)}
+                >
+                  <SelectTrigger className={errors.banking_option ? 'border-red-500' : ''}>
+                    <SelectValue placeholder={t('Select Banking Option')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bank_account">{t('Bank Account')}</SelectItem>
+                    <SelectItem value="mobile_wallet">{t('Mobile Wallet')}</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.banking_option && <p className="text-red-500 text-xs">{errors.banking_option}</p>}
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="account_holder_name" required>{t('Account Holder Name')}</Label>
-                <Input
-                  id="account_holder_name"
-                  required
-                  value={formData.account_holder_name}
-                  onChange={(e) => handleChange('account_holder_name', e.target.value)}
-                  placeholder={t('e.g. John Doe')}
-                  className={errors.account_holder_name ? 'border-red-500' : ''}
-                />
-                {errors.account_holder_name && <p className="text-red-500 text-xs">{errors.account_holder_name}</p>}
+            {formData.banking_option === 'bank_account' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="bank_name" required>{t('Bank Name')}</Label>
+                  <Input
+                    id="bank_name"
+                    value={formData.bank_name}
+                    required
+                    onChange={(e) => handleChange('bank_name', e.target.value)}
+                    placeholder={t('e.g. Bank of America')}
+                    className={errors.bank_name ? 'border-red-500' : ''}
+                  />
+                  {errors.bank_name && <p className="text-red-500 text-xs">{errors.bank_name}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="account_holder_name" required>{t('Account Holder Name')}</Label>
+                  <Input
+                    id="account_holder_name"
+                    required
+                    value={formData.account_holder_name}
+                    onChange={(e) => handleChange('account_holder_name', e.target.value)}
+                    placeholder={t('e.g. John Doe')}
+                    className={errors.account_holder_name ? 'border-red-500' : ''}
+                  />
+                  {errors.account_holder_name && <p className="text-red-500 text-xs">{errors.account_holder_name}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="account_number" required>{t('Account Number')}</Label>
+                  <Input
+                    id="account_number"
+                    value={formData.account_number}
+                    required
+                    onChange={(e) => handleChange('account_number', e.target.value)}
+                    placeholder={t('e.g. 1234567890')}
+                    className={errors.account_number ? 'border-red-500' : ''}
+                  />
+                  {errors.account_number && <p className="text-red-500 text-xs">{errors.account_number}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bank_identifier_code" required>{t('Bank Identifier Code (BIC/SWIFT)')}</Label>
+                  <Input
+                    id="bank_identifier_code"
+                    value={formData.bank_identifier_code}
+                    required
+                    onChange={(e) => handleChange('bank_identifier_code', e.target.value)}
+                    placeholder={t('e.g. BOFAUS3N')}
+                    className={errors.bank_identifier_code ? 'border-red-500' : ''}
+                  />
+                  {errors.bank_identifier_code && <p className="text-red-500 text-xs">{errors.bank_identifier_code}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bank_branch" required>{t('Bank Branch')}</Label>
+                  <Input
+                    id="bank_branch"
+                    value={formData.bank_branch}
+                    required
+                    onChange={(e) => handleChange('bank_branch', e.target.value)}
+                    placeholder={t('e.g. New York Main Branch')}
+                    className={errors.bank_branch ? 'border-red-500' : ''}
+                  />
+                  {errors.bank_branch && <p className="text-red-500 text-xs">{errors.bank_branch}</p>}
+                </div>
               </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="wallet_provider" required>{t('Select Wallet')}</Label>
+                  <Select
+                    value={formData.wallet_provider}
+                    required
+                    onValueChange={(value) => handleChange('wallet_provider', value)}
+                  >
+                    <SelectTrigger className={errors.wallet_provider ? 'border-red-500' : ''}>
+                      <SelectValue placeholder={t('Select Wallet Provider')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Airtel Money">{t('Airtel Money')}</SelectItem>
+                      <SelectItem value="Orange Money">{t('Orange Money')}</SelectItem>
+                      <SelectItem value="M-Pesa">{t('M-Pesa')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.wallet_provider && <p className="text-red-500 text-xs">{errors.wallet_provider}</p>}
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="account_number" >{t('Account Number')}</Label>
-                <Input
-                  id="account_number"
-                  value={formData.account_number}
-                  required
-                  onChange={(e) => handleChange('account_number', e.target.value)}
-                  placeholder={t('e.g. 1234567890')}
-                  className={errors.account_number ? 'border-red-500' : ''}
-                />
-                {errors.account_number && <p className="text-red-500 text-xs">{errors.account_number}</p>}
+                <div className="space-y-2">
+                  <Label htmlFor="wallet_phone" required>{t('Phone Number')}</Label>
+                  <Input
+                    id="wallet_phone"
+                    required
+                    value={formData.wallet_phone}
+                    onChange={(e) => handleChange('wallet_phone', e.target.value)}
+                    placeholder={t('e.g. +1 234 567 8900')}
+                    className={errors.wallet_phone ? 'border-red-500' : ''}
+                  />
+                  {errors.wallet_phone && <p className="text-red-500 text-xs">{errors.wallet_phone}</p>}
+                </div>
               </div>
+            )}
 
-              <div className="space-y-2">
-                <Label htmlFor="bank_identifier_code" required>{t('Bank Identifier Code (BIC/SWIFT)')}</Label>
-                <Input
-                  id="bank_identifier_code"
-                  value={formData.bank_identifier_code}
-                  required
-                  onChange={(e) => handleChange('bank_identifier_code', e.target.value)}
-                  placeholder={t('e.g. BOFAUS3N')}
-                  className={errors.bank_identifier_code ? 'border-red-500' : ''}
-                />
-                {errors.bank_identifier_code && <p className="text-red-500 text-xs">{errors.bank_identifier_code}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bank_branch" required>{t('Bank Branch')}</Label>
-                <Input
-                  id="bank_branch"
-                  value={formData.bank_branch}
-                  required
-                  onChange={(e) => handleChange('bank_branch', e.target.value)}
-                  placeholder={t('e.g. New York Main Branch')}
-                  className={errors.bank_branch ? 'border-red-500' : ''}
-                />
-                {errors.bank_branch && <p className="text-red-500 text-xs">{errors.bank_branch}</p>}
-              </div>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="tax_payer_id" >{t('Tax Payer ID')}</Label>
                 <Input

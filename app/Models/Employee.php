@@ -40,6 +40,9 @@ class Employee extends Model
         'bank_identifier_code',
         'bank_branch',
         'tax_payer_id',
+        'banking_option',
+        'wallet_provider',
+        'wallet_phone',
         'employee_status',
         'created_by'
     ];

@@ -238,12 +238,15 @@ class EmployeeController extends Controller
                     'emergency_contact_number' => 'required|string|max:20',
 
                     // Banking information
-                    'bank_name' => 'required|string|max:255',
-                    'account_holder_name' => 'nullable|string|max:255',
-                    'account_number' => 'nullable|string|max:50',
-                    'bank_identifier_code' => 'nullable|string|max:50',
-                    'bank_branch' => 'nullable|string|max:255',
+                    'banking_option' => 'required|in:bank_account,mobile_wallet',
+                    'bank_name' => 'required_if:banking_option,bank_account|nullable|string|max:255',
+                    'account_holder_name' => 'required_if:banking_option,bank_account|nullable|string|max:255',
+                    'account_number' => 'required_if:banking_option,bank_account|nullable|string|max:50',
+                    'bank_identifier_code' => 'required_if:banking_option,bank_account|nullable|string|max:50',
+                    'bank_branch' => 'required_if:banking_option,bank_account|nullable|string|max:255',
                     'tax_payer_id' => 'nullable|string|max:50',
+                    'wallet_provider' => 'required_if:banking_option,mobile_wallet|nullable|string|in:Airtel Money,Orange Money,M-Pesa',
+                    'wallet_phone' => 'required_if:banking_option,mobile_wallet|nullable|string|max:20',
 
                     // Documents
                     'documents' => 'nullable|array',
@@ -343,11 +346,24 @@ class EmployeeController extends Controller
                 $employee->emergency_contact_name = $request->emergency_contact_name;
                 $employee->emergency_contact_relationship = $request->emergency_contact_relationship;
                 $employee->emergency_contact_number = $request->emergency_contact_number;
-                $employee->bank_name = $request->bank_name;
-                $employee->account_holder_name = $request->account_holder_name;
-                $employee->account_number = $request->account_number;
-                $employee->bank_identifier_code = $request->bank_identifier_code;
-                $employee->bank_branch = $request->bank_branch;
+                $employee->banking_option = $request->banking_option;
+                if ($request->banking_option === 'bank_account') {
+                    $employee->bank_name = $request->bank_name;
+                    $employee->account_holder_name = $request->account_holder_name;
+                    $employee->account_number = $request->account_number;
+                    $employee->bank_identifier_code = $request->bank_identifier_code;
+                    $employee->bank_branch = $request->bank_branch;
+                    $employee->wallet_provider = null;
+                    $employee->wallet_phone = null;
+                } else {
+                    $employee->wallet_provider = $request->wallet_provider;
+                    $employee->wallet_phone = $request->wallet_phone;
+                    $employee->bank_name = null;
+                    $employee->account_holder_name = null;
+                    $employee->account_number = null;
+                    $employee->bank_identifier_code = null;
+                    $employee->bank_branch = null;
+                }
                 $employee->tax_payer_id = $request->tax_payer_id;
                 $employee->base_salary = $request->salary;
                 $employee->created_by = creatorId();
@@ -550,12 +566,15 @@ class EmployeeController extends Controller
                     'emergency_contact_number' => 'required|string|max:20',
 
                     // Banking information
-                    'bank_name' => 'required|string|max:255',
-                    'account_holder_name' => 'required|string|max:255',
-                    'account_number' => 'required|string|max:50',
-                    'bank_identifier_code' => 'nullable|string|max:50',
-                    'bank_branch' => 'nullable|string|max:255',
+                    'banking_option' => 'required|in:bank_account,mobile_wallet',
+                    'bank_name' => 'required_if:banking_option,bank_account|nullable|string|max:255',
+                    'account_holder_name' => 'required_if:banking_option,bank_account|nullable|string|max:255',
+                    'account_number' => 'required_if:banking_option,bank_account|nullable|string|max:50',
+                    'bank_identifier_code' => 'required_if:banking_option,bank_account|nullable|string|max:50',
+                    'bank_branch' => 'required_if:banking_option,bank_account|nullable|string|max:255',
                     'tax_payer_id' => 'nullable|string|max:50',
+                    'wallet_provider' => 'required_if:banking_option,mobile_wallet|nullable|string|in:Airtel Money,Orange Money,M-Pesa',
+                    'wallet_phone' => 'required_if:banking_option,mobile_wallet|nullable|string|max:20',
 
                     // Documents
                     'documents' => 'nullable|array',
@@ -627,11 +646,26 @@ class EmployeeController extends Controller
                 $employee->emergency_contact_name = $request->emergency_contact_name;
                 $employee->emergency_contact_relationship = $request->emergency_contact_relationship;
                 $employee->emergency_contact_number = $request->emergency_contact_number;
-                $employee->bank_name = $request->bank_name;
-                $employee->account_holder_name = $request->account_holder_name;
-                $employee->account_number = $request->account_number;
-                $employee->bank_identifier_code = $request->bank_identifier_code;
-                $employee->bank_branch = $request->bank_branch;
+                $employee->banking_option = $request->banking_option;
+                if ($request->banking_option === 'bank_account') {
+                    $employee->bank_name = $request->bank_name;
+                    $employee->account_holder_name = $request->account_holder_name;
+                    $employee->account_number = $request->account_number;
+                    $employee->bank_identifier_code = $request->bank_identifier_code;
+                    $employee->bank_branch = $request->bank_branch;
+                    // Reset wallet info
+                    $employee->wallet_provider = null;
+                    $employee->wallet_phone = null;
+                } else {
+                    $employee->wallet_provider = $request->wallet_provider;
+                    $employee->wallet_phone = $request->wallet_phone;
+                    // Reset bank info
+                    $employee->bank_name = null;
+                    $employee->account_holder_name = null;
+                    $employee->account_number = null;
+                    $employee->bank_identifier_code = null;
+                    $employee->bank_branch = null;
+                }
                 $employee->tax_payer_id = $request->tax_payer_id;
                 $employee->base_salary = $request->salary;
 
