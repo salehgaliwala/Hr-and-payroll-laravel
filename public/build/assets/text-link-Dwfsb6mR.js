@@ -1,0 +1,1 @@
+import{j as t}from"./ui-RbCuDjZz.js";import{$ as n,c as a}from"./app-B5Fjk4kI.js";function u({className:r="",children:o,...e}){return t.jsx(n,{className:a("text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! cursor-pointer dark:decoration-neutral-500",r),...e,children:o})}export{u as T};
