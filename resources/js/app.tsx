@@ -76,6 +76,12 @@ createInertiaApp({
         const renderApp = (appProps: any) => {
             const currentGlobalSettings = appProps.initialPage.props.globalSettings || {};
             const user = appProps.initialPage.props.auth?.user;
+            const userLanguage = appProps.initialPage.props.userLanguage;
+
+            // Synchronize i18n language with the user's selected language
+            if (userLanguage && i18n.language !== userLanguage) {
+                i18n.changeLanguage(userLanguage);
+            }
             
             return (
                 <ModalStackProvider>
