@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,14 @@ import { useBrandTheme } from '@/hooks/use-brand-theme';
 
 export default function CareerPage() {
   const { t, i18n } = useTranslation();
-  const { companySettings, jobPostings, jobTypes, locations, filters, companyId, vacancyRanges, companySlug, userSlug } = usePage().props as any;
+  const { companySettings, jobPostings, jobTypes, locations, filters, companyId, vacancyRanges, companySlug, userSlug, userLanguage } = usePage().props as any;
+  
+  // Sync language with the application's selected language
+  useEffect(() => {
+    if (userLanguage && i18n.language !== userLanguage) {
+      i18n.changeLanguage(userLanguage);
+    }
+  }, [userLanguage, i18n]);
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
   const [locationFilter, setLocationFilter] = useState(filters?.location || 'all');
   const [typeFilter, setTypeFilter] = useState(filters?.job_type ? filters.job_type.split(',') : []);

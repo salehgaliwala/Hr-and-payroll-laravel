@@ -9,10 +9,18 @@ import { getImagePath } from '@/utils/helpers';
 import { useTranslation } from 'react-i18next';
 import { useFavicon } from '@/hooks/use-favicon';
 import { useBrandTheme } from '@/hooks/use-brand-theme';
+import { useEffect } from 'react';
 
 export default function JobDetails() {
-  const { t } = useTranslation();
-  const { jobPosting, relatedJobs, companyId, companySettings, userSlug } = usePage().props as any;
+  const { t, i18n } = useTranslation();
+  const { jobPosting, relatedJobs, companyId, companySettings, userSlug, userLanguage } = usePage().props as any;
+
+  // Sync language with the application's selected language
+  useEffect(() => {
+    if (userLanguage && i18n.language !== userLanguage) {
+      i18n.changeLanguage(userLanguage);
+    }
+  }, [userLanguage, i18n]);
 
   // Use favicon hook and brand theme like career index
   useFavicon();

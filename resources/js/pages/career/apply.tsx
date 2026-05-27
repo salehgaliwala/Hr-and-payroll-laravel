@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,8 +16,15 @@ import { useFavicon } from '@/hooks/use-favicon';
 import { useBrandTheme } from '@/hooks/use-brand-theme';
 
 export default function JobApplication() {
-  const { t } = useTranslation();
-  const { jobPosting, customQuestions, candidateSources, applicantFields, companyId, companySettings, userSlug } = usePage().props as any;
+  const { t, i18n } = useTranslation();
+  const { jobPosting, customQuestions, candidateSources, applicantFields, companyId, companySettings, userSlug, userLanguage } = usePage().props as any;
+  
+  // Sync language with the application's selected language
+  useEffect(() => {
+    if (userLanguage && i18n.language !== userLanguage) {
+      i18n.changeLanguage(userLanguage);
+    }
+  }, [userLanguage, i18n]);
   const visibilityFields = jobPosting?.visibility || [];
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
