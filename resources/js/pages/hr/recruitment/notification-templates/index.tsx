@@ -22,8 +22,8 @@ export default function NotificationTemplateIndex() {
   const { t } = useTranslation();
   const { templates, filters, statusOptions } = usePage().props as any;
   const [search, setSearch] = useState(filters.search || '');
-  const [typeFilter, setTypeFilter] = useState(filters.type || '');
-  const [statusFilter, setStatusFilter] = useState(filters.status_key || '');
+  const [typeFilter, setTypeFilter] = useState(filters.type || 'all');
+  const [statusFilter, setStatusFilter] = useState(filters.status_key || 'all');
 
   const breadcrumbs = [
     { title: t('Dashboard'), href: route('dashboard') },
@@ -34,8 +34,8 @@ export default function NotificationTemplateIndex() {
   const handleFilterChange = () => {
     router.get(route('hr.recruitment.notification-templates.index'), {
       search,
-      type: typeFilter,
-      status_key: statusFilter,
+      type: typeFilter === 'all' ? '' : typeFilter,
+      status_key: statusFilter === 'all' ? '' : statusFilter,
     }, { preserveState: true, replace: true });
   };
 
@@ -78,7 +78,7 @@ export default function NotificationTemplateIndex() {
                 <SelectValue placeholder={t('All Types')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{t('All Types')}</SelectItem>
+                <SelectItem value="all">{t('All Types')}</SelectItem>
                 <SelectItem value="email">{t('Email')}</SelectItem>
                 <SelectItem value="whatsapp">{t('WhatsApp')}</SelectItem>
               </SelectContent>
@@ -88,7 +88,7 @@ export default function NotificationTemplateIndex() {
                 <SelectValue placeholder={t('All Statuses')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{t('All Statuses')}</SelectItem>
+                <SelectItem value="all">{t('All Statuses')}</SelectItem>
                 {statusOptions && Object.entries(statusOptions).map(([key, label]) => (
                   <SelectItem key={key} value={key}>{label as string}</SelectItem>
                 ))}
