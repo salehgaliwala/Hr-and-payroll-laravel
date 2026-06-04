@@ -1049,6 +1049,7 @@ class DefaultCompanyUserSeeder extends Seeder
 
             // career page
             'manage-career-page',
+            'manage-notification-templates',
 
             // Download Certificate permission
             'download-joining-letter',
