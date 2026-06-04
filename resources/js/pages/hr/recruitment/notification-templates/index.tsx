@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Edit, Mail, MessageSquare, Search, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Edit, Mail, MessageSquare, Plus, Search, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from '@inertiajs/react';
 
@@ -58,6 +58,13 @@ export default function NotificationTemplateIndex() {
     <PageTemplate
       title={t('Notification Templates')}
       breadcrumbs={breadcrumbs}
+      actions={[
+        {
+          label: t('Add Template'),
+          icon: <Plus className="h-4 w-4 mr-2" />,
+          onClick: () => router.get(route('hr.recruitment.notification-templates.create'))
+        },
+      ]}
     >
       <Card>
         <CardHeader>
@@ -106,6 +113,7 @@ export default function NotificationTemplateIndex() {
                 <TableHead>{t('Name')}</TableHead>
                 <TableHead>{t('Type')}</TableHead>
                 <TableHead>{t('Candidate Status')}</TableHead>
+                <TableHead>{t('Approval')}</TableHead>
                 <TableHead>{t('Status')}</TableHead>
                 <TableHead>{t('Actions')}</TableHead>
               </TableRow>
@@ -124,6 +132,19 @@ export default function NotificationTemplateIndex() {
                     <Badge variant="secondary">
                       {getStatusLabel(template.status_key)}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {template.type === 'whatsapp' ? (
+                      <Badge variant={
+                        template.approval_status === 'approved' ? 'success' :
+                        template.approval_status === 'rejected' ? 'destructive' :
+                        'warning'
+                      }>
+                        {t(template.approval_status.charAt(0).toUpperCase() + template.approval_status.slice(1))}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">{t('N/A')}</Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={template.is_active ? 'success' : 'secondary'}>

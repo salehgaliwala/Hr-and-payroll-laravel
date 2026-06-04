@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\NotificationTemplate;
+use App\Models\WhatsappTemplate;
+use App\Services\TwilioContentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -10,6 +12,13 @@ use Inertia\Inertia;
 
 class NotificationTemplateController extends Controller
 {
+    protected TwilioContentService $twilioContentService;
+
+    public function __construct()
+    {
+        $this->twilioContentService = new TwilioContentService();
+    }
+
     /**
      * Display a listing of notification templates.
      */
@@ -45,6 +54,96 @@ class NotificationTemplateController extends Controller
             'filters' => $request->all(['type', 'purpose', 'status_key', 'search', 'per_page']),
             'statusOptions' => NotificationTemplate::getStatusOptions(),
         ]);
+    }
+
+    /**
+     * Show the form for creating a new notification template.
+     */
+    public function create()
+    {
+        if (!Auth::user()->can('manage-notification-templates')) {
+            return redirect()->back()->with('error', __('Permission Denied.'));
+        }
+
+        $availablePlaceholders = [
+            'candidate_name',
+            'job_title',
+            'application_date',
+            'company_name',
+            'candidate_email',
+            'candidate_phone',
+        ];
+
+        return Inertia::render('hr/recruitment/notification-templates/create', [
+            'availablePlaceholders' => $availablePlaceholders,
+            'statusOptions' => NotificationTemplate::getStatusOptions(),
+            'categories' => WhatsappTemplate::CATEGORIES,
+        ]);
+    }
+
+    /**
+     * Store a newly created notification template in storage.
+     */
+    public function store(Request $request)
+    {
+        if (!Auth::user()->can('manage-notification-templates')) {
+            return redirect()->back()->with('error', __('Permission Denied.'));
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:email,whatsapp',
+            'purpose' => 'required|string|max:255',
+            'subject' => 'nullable|required_if:type,email|string|max:500',
+            'body' => 'required|string',
+            'status_key' => 'nullable|string|max:50',
+            'category' => 'nullable|required_if:type,whatsapp|in:' . implode(',', WhatsappTemplate::CATEGORIES),
+            'language' => 'nullable|string|max:10',
+            'sample_data' => 'nullable|array',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $isWhatsapp = $request->type === 'whatsapp';
+
+        $template = NotificationTemplate::create([
+            'name' => $request->name,
+            'type' => $request->type,
+            'category' => $request->category,
+            'language' => $request->language ?: 'en',
+            'purpose' => $request->purpose,
+            'status_key' => $request->status_key === 'none' ? null : $request->status_key,
+            'subject' => $request->subject,
+            'body' => $request->body,
+            'is_active' => $isWhatsapp ? false : true,
+            'approval_status' => $isWhatsapp ? NotificationTemplate::APPROVAL_PENDING : NotificationTemplate::APPROVAL_APPROVED,
+            'created_by' => Auth::id(),
+        ]);
+
+        if ($isWhatsapp) {
+            $twilioSid = config('twilio.sid') ?: getSetting('twilio_sid', '');
+            if (!empty($twilioSid)) {
+                $result = $this->twilioContentService->submitTemplateToTwilio(
+                    $template,
+                    $request->sample_data ?? []
+                );
+
+                if ($result['success']) {
+                    $template->update([
+                        'twilio_content_sid' => $result['content_sid'],
+                    ]);
+                } else {
+                    session()->flash('warning', __('Template saved locally but submission to Twilio failed: :error', [
+                        'error' => $result['error'],
+                    ]));
+                }
+            }
+        }
+
+        return redirect()->route('hr.recruitment.notification-templates.index')
+            ->with('success', __('Notification template created successfully'));
     }
 
     /**
@@ -106,7 +205,7 @@ class NotificationTemplateController extends Controller
             'subject' => $request->subject,
             'body' => $request->body,
             'is_active' => $request->boolean('is_active', true),
-            'status_key' => $request->status_key,
+            'status_key' => $request->status_key === 'none' ? null : $request->status_key,
         ]);
 
         return redirect()->route('hr.recruitment.notification-templates.index')

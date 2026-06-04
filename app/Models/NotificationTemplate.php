@@ -12,14 +12,24 @@ class NotificationTemplate extends Model
     protected $fillable = [
         'name',
         'type',
+        'category',
+        'language',
         'purpose',
         'status_key',
         'subject',
         'body',
         'placeholders',
+        'twilio_content_sid',
+        'approval_status',
+        'rejection_reason',
         'is_active',
         'created_by',
     ];
+
+    const APPROVAL_DRAFT = 'draft';
+    const APPROVAL_PENDING = 'pending';
+    const APPROVAL_APPROVED = 'approved';
+    const APPROVAL_REJECTED = 'rejected';
 
     protected $casts = [
         'placeholders' => 'array',
@@ -84,5 +94,14 @@ class NotificationTemplate extends Model
             $subject = str_replace('{{' . $key . '}}', $value, $subject);
         }
         return $subject;
+    }
+
+    /**
+     * Extract placeholders like {{1}}, {{2}} from body.
+     */
+    public function getPlaceholders(): array
+    {
+        preg_match_all('/\{\{(\d+)\}\}/', $this->body, $matches);
+        return $matches[1] ?? [];
     }
 }

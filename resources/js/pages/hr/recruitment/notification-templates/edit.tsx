@@ -16,12 +16,14 @@ export default function NotificationTemplateEdit() {
   const { template, availablePlaceholders, statusOptions } = usePage().props as any;
   const [showPreview, setShowPreview] = useState(false);
 
+  const isPendingApproval = template.type === 'whatsapp' && (template.approval_status === 'pending' || template.approval_status === 'rejected');
+
   const { data, setData, put, processing, errors } = useForm({
     name: template.name || '',
     subject: template.subject || '',
     body: template.body || '',
     is_active: template.is_active ?? true,
-    status_key: template.status_key || '',
+    status_key: template.status_key || 'none',
   });
 
   const breadcrumbs = [
@@ -85,12 +87,20 @@ export default function NotificationTemplateEdit() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {isPendingApproval && (
+                  <Badge variant="warning" className="w-full justify-center py-1">
+                    {template.approval_status === 'pending'
+                      ? t('This template is currently pending approval from Twilio and cannot be edited.')
+                      : t('This template was rejected by Twilio and cannot be edited.')}
+                  </Badge>
+                )}
                 <div>
                   <Label>{t('Template Name')}</Label>
                   <Input
                     value={data.name}
                     onChange={(e) => setData('name', e.target.value)}
                     error={errors.name}
+                    disabled={isPendingApproval}
                   />
                   {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
                 </div>
@@ -103,6 +113,7 @@ export default function NotificationTemplateEdit() {
                       onChange={(e) => setData('subject', e.target.value)}
                       placeholder={t('Enter email subject with placeholders...')}
                       error={errors.subject}
+                      disabled={isPendingApproval}
                     />
                     {errors.subject && <p className="text-sm text-red-500 mt-1">{errors.subject}</p>}
                   </div>
@@ -117,6 +128,7 @@ export default function NotificationTemplateEdit() {
                     placeholder={t('Enter template body with placeholders...')}
                     error={errors.body}
                     className={template.type === 'email' ? 'font-mono text-sm' : 'font-mono text-sm'}
+                    disabled={isPendingApproval}
                   />
                   {errors.body && <p className="text-sm text-red-500 mt-1">{errors.body}</p>}
                 </div>
@@ -140,12 +152,13 @@ export default function NotificationTemplateEdit() {
                   <Select
                     value={data.status_key}
                     onValueChange={(value) => setData('status_key', value)}
+                    disabled={isPendingApproval}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t('Select status')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{t('General (No specific status)')}</SelectItem>
+                      <SelectItem value="none">{t('General (No specific status)')}</SelectItem>
                       {statusOptions && Object.entries(statusOptions).map(([key, label]) => (
                         <SelectItem key={key} value={key}>{label as string}</SelectItem>
                       ))}
@@ -192,7 +205,7 @@ export default function NotificationTemplateEdit() {
                 <CardTitle className="text-sm font-medium">{t('Actions')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button type="submit" className="w-full" disabled={processing}>
+                <Button type="submit" className="w-full" disabled={processing || isPendingApproval}>
                   <Save className="h-4 w-4 mr-2" />
                   {t('Save Template')}
                 </Button>
