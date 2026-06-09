@@ -24,7 +24,8 @@ import {
   Redo,
   Link as LinkIcon,
   Unlink,
-  Code
+  Code,
+  Image as ImageIcon
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { forwardRef, useImperativeHandle, useState } from 'react'
