@@ -205,7 +205,7 @@ export default function NotificationTemplateEdit() {
                   ))}
                 </div>
                 <p className="text-xs text-gray-500 mt-3">
-                  {t('Click a placeholder to insert it at the cursor position in the body field.')}
+                  {t('Click a placeholder to insert it into the body.')}
                 </p>
               </CardContent>
             </Card>

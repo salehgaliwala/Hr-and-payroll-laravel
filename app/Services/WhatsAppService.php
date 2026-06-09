@@ -83,16 +83,18 @@ class WhatsAppService
      * Send a WhatsApp message using a Twilio Content API template (pre-approved).
      *
      * @param string $to Recipient phone number
-     * @param WhatsappTemplate $template
+     * @param mixed $template WhatsappTemplate or NotificationTemplate
      * @param array $contentVariables Values for {{1}}, {{2}} placeholders
      * @return array ['success' => bool, 'error' => string|null]
      */
-    public function sendWithContentTemplate(string $to, WhatsappTemplate $template, array $contentVariables = []): array
+    public function sendWithContentTemplate(string $to, $template, array $contentVariables = []): array
     {
-        if ($template->status !== 'approved') {
+        $status = $template instanceof WhatsappTemplate ? $template->status : $template->approval_status;
+
+        if ($status !== 'approved') {
             return [
                 'success' => false,
-                'error' => 'Template is not approved. Current status: ' . $template->status,
+                'error' => 'Template is not approved. Current status: ' . $status,
             ];
         }
 
@@ -133,7 +135,7 @@ class WhatsAppService
             if ($response->successful()) {
                 Log::info('WhatsApp template message sent successfully', [
                     'to' => $to,
-                    'template' => $template->friendly_name,
+                    'template' => $template->friendly_name ?? $template->name,
                     'sid' => $response->json('sid'),
                 ]);
 
@@ -143,7 +145,7 @@ class WhatsAppService
             $errorMsg = $response->json('message') ?: $response->body();
             Log::error('WhatsApp template message sending failed', [
                 'to' => $to,
-                'template' => $template->friendly_name,
+                'template' => $template->friendly_name ?? $template->name,
                 'error' => $errorMsg,
             ]);
 
@@ -151,7 +153,7 @@ class WhatsAppService
         } catch (\Exception $e) {
             Log::error('WhatsApp template exception', [
                 'to' => $to,
-                'template' => $template->friendly_name,
+                'template' => $template->friendly_name ?? $template->name,
                 'error' => $e->getMessage(),
             ]);
             return ['success' => false, 'error' => $e->getMessage()];

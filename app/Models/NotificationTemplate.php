@@ -97,11 +97,11 @@ class NotificationTemplate extends Model
     }
 
     /**
-     * Extract placeholders like {{1}}, {{2}} from body.
+     * Extract placeholders like {{first_name}}, {{1}} etc from body.
      */
     public function getPlaceholders(): array
     {
-        preg_match_all('/\{\{(\d+)\}\}/', $this->body, $matches);
-        return $matches[1] ?? [];
+        preg_match_all('/\{\{(.+?)\}\}/', $this->body, $matches);
+        return array_unique($matches[1] ?? []);
     }
 }
