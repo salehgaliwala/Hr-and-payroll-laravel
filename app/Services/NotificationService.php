@@ -23,13 +23,40 @@ class NotificationService
      */
     protected function buildCandidateData(Candidate $candidate): array
     {
+        $offer = $candidate->job ? \App\Models\Offer::where('candidate_id', $candidate->id)
+            ->where('job_id', $candidate->job_id)
+            ->orderBy('created_at', 'desc')
+            ->first() : null;
+
+        $interview = $candidate->interviews()->orderBy('scheduled_date', 'desc')->orderBy('scheduled_time', 'desc')->first();
+
         return [
             'candidate_name' => $candidate->full_name,
+            'first_name' => $candidate->first_name,
             'job_title' => $candidate->job?->title ?? 'N/A',
+            'Job_title' => $candidate->job?->title ?? 'N/A',
             'application_date' => $candidate->application_date?->format('Y-m-d') ?? now()->format('Y-m-d'),
             'company_name' => getSetting('titleText', 'Company'),
             'candidate_email' => $candidate->email,
             'candidate_phone' => $candidate->phone ?? 'N/A',
+            'department' => $candidate->department?->name ?? ($offer?->department?->name ?? 'N/A'),
+
+            // Offer related
+            'start_date' => $offer?->start_date?->format('Y-m-d') ?? 'N/A',
+            'manager_name' => $offer?->manager?->name ?? 'N/A',
+            'salary' => $offer?->salary ?? 'N/A',
+            'bonus' => $offer?->bonus ?? 'N/A',
+            'benefits' => $offer?->benefits ?? 'N/A',
+            'probation_period' => $offer?->probation_period ?? 'N/A',
+            'notice_period' => $offer?->notice_period ?? 'N/A',
+            'working_hours' => $offer?->working_hrs ?? 'N/A',
+
+            // Interview related
+            'date' => $interview?->scheduled_date?->format('Y-m-d') ?? 'N/A',
+            'day' => $interview?->scheduled_date?->format('l') ?? 'N/A',
+            'time' => $interview?->scheduled_time ?? 'N/A',
+            'interview_type' => $interview?->interviewType?->name ?? 'N/A',
+            'daration' => $interview?->duration ?? 'N/A',
         ];
     }
 

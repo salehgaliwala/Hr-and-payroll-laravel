@@ -17,6 +17,7 @@ use App\Models\NotificationLog;
 use App\Models\Offer;
 use App\Models\Shift;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -309,6 +310,22 @@ class CandidateController extends Controller
         }
 
         $candidate->update(['status' => $request->status]);
+
+        // Map candidate status to notification status key
+        $statusMapping = [
+            'New' => 'applied',
+            'Screening' => 'screening',
+            'Interview' => 'interview',
+            'Offer' => 'offered',
+            'Hired' => 'hired',
+            'Rejected' => 'rejected',
+        ];
+
+        if (isset($statusMapping[$request->status])) {
+            $notificationService = new NotificationService();
+            $notificationService->sendByStatus($candidate, $statusMapping[$request->status]);
+        }
+
         return redirect()->back()->with('success', __('Candidate status updated successfully'));
     }
 

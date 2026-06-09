@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { RichTextField } from '@/components/ui/rich-text-field';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -121,15 +122,25 @@ export default function NotificationTemplateEdit() {
 
                 <div>
                   <Label>{t('Template Body')}</Label>
-                  <Textarea
-                    value={data.body}
-                    onChange={(e) => setData('body', e.target.value)}
-                    rows={15}
-                    placeholder={t('Enter template body with placeholders...')}
-                    error={errors.body}
-                    className={template.type === 'email' ? 'font-mono text-sm' : 'font-mono text-sm'}
-                    disabled={isPendingApproval}
-                  />
+                  {template.type === 'email' ? (
+                    <RichTextField
+                      value={data.body}
+                      onChange={(value) => setData('body', value)}
+                      placeholder={t('Enter template body with placeholders...')}
+                      error={errors.body}
+                      disabled={isPendingApproval}
+                    />
+                  ) : (
+                    <Textarea
+                      value={data.body}
+                      onChange={(e) => setData('body', e.target.value)}
+                      rows={15}
+                      placeholder={t('Enter template body with placeholders...')}
+                      error={errors.body}
+                      className="font-mono text-sm"
+                      disabled={isPendingApproval}
+                    />
+                  )}
                   {errors.body && <p className="text-sm text-red-500 mt-1">{errors.body}</p>}
                 </div>
               </CardContent>

@@ -67,11 +67,27 @@ class NotificationTemplateController extends Controller
 
         $availablePlaceholders = [
             'candidate_name',
+            'first_name',
             'job_title',
+            'Job_title',
             'application_date',
             'company_name',
             'candidate_email',
             'candidate_phone',
+            'department',
+            'start_date',
+            'manager_name',
+            'salary',
+            'bonus',
+            'benefits',
+            'probation_period',
+            'notice_period',
+            'working_hours',
+            'date',
+            'day',
+            'time',
+            'interview_type',
+            'daration',
         ];
 
         return Inertia::render('hr/recruitment/notification-templates/create', [
@@ -161,11 +177,27 @@ class NotificationTemplateController extends Controller
 
         $availablePlaceholders = [
             'candidate_name',
+            'first_name',
             'job_title',
+            'Job_title',
             'application_date',
             'company_name',
             'candidate_email',
             'candidate_phone',
+            'department',
+            'start_date',
+            'manager_name',
+            'salary',
+            'bonus',
+            'benefits',
+            'probation_period',
+            'notice_period',
+            'working_hours',
+            'date',
+            'day',
+            'time',
+            'interview_type',
+            'daration',
         ];
 
         return Inertia::render('hr/recruitment/notification-templates/edit', [
