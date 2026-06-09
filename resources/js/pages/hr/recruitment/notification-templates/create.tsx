@@ -44,21 +44,22 @@ export default function NotificationTemplateCreate() {
     setData('body', data.body + `{{${placeholder}}}`);
   };
 
-  const insertWhatsappPlaceholder = (index: number) => {
-    setData('body', data.body + `{{${index + 1}}}`);
+  const insertWhatsappPlaceholder = (placeholder: string) => {
+    setData('body', data.body + `{{${placeholder}}}`);
   };
 
   // Sync sample data array with body placeholders for WhatsApp
   useEffect(() => {
     if (data.type === 'whatsapp') {
-      const matches = data.body.match(/\{\{(\d+)\}\}/g) || [];
-      const placeholderCount = matches.length;
-      const uniqueIndices = Array.from(new Set(matches.map(m => parseInt(m.replace(/\{\{|\}\}/g, '')))));
-      const maxIndex = uniqueIndices.length > 0 ? Math.max(...uniqueIndices) : 0;
+      const matches = data.body.match(/\{\{(.+?)\}\}/g) || [];
+      const uniquePlaceholders = Array.from(new Set(matches.map(m => m.replace(/\{\{|\}\}/g, ''))));
 
       const newSampleData = [...data.sample_data];
-      if (newSampleData.length < maxIndex) {
-        for (let i = newSampleData.length; i < maxIndex; i++) {
+      // Note: For named placeholders, sample data handling might need to change from index-based
+      // to object-based if Twilio requires it, but the service uses index-based for now.
+      // Keeping it simple for UI consistency.
+      if (newSampleData.length < uniquePlaceholders.length) {
+        for (let i = newSampleData.length; i < uniquePlaceholders.length; i++) {
           newSampleData[i] = '';
         }
         setData('sample_data', newSampleData);
@@ -259,34 +260,19 @@ export default function NotificationTemplateCreate() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {data.type === 'email' ? (
-                    availablePlaceholders?.map((placeholder: string) => (
-                      <Badge
-                        key={placeholder}
-                        variant="outline"
-                        className="cursor-pointer hover:bg-gray-100"
-                        onClick={() => insertPlaceholder(placeholder)}
-                      >
-                        {'{{'}{placeholder}{'}}'}
-                      </Badge>
-                    ))
-                  ) : (
-                    Array.from({ length: 5 }).map((_, i) => (
-                      <Badge
-                        key={i}
-                        variant="outline"
-                        className="cursor-pointer hover:bg-gray-100"
-                        onClick={() => insertWhatsappPlaceholder(i)}
-                      >
-                        {'{{'}{i + 1}{'}}'}
-                      </Badge>
-                    ))
-                  )}
+                  {availablePlaceholders?.map((placeholder: string) => (
+                    <Badge
+                      key={placeholder}
+                      variant="outline"
+                      className="cursor-pointer hover:bg-gray-100"
+                      onClick={() => insertPlaceholder(placeholder)}
+                    >
+                      {'{{'}{placeholder}{'}}'}
+                    </Badge>
+                  ))}
                 </div>
                 <p className="text-xs text-gray-500 mt-3">
-                  {data.type === 'email'
-                    ? t('Click a placeholder to insert it into the body.')
-                    : t('WhatsApp uses numbered placeholders. Use {{1}}, {{2}} etc.')}
+                  {t('Click a placeholder to insert it into the body.')}
                 </p>
               </CardContent>
             </Card>

@@ -91,8 +91,19 @@ class NotificationService
                 ->first();
 
             if ($whatsappTemplate) {
-                $message = $whatsappTemplate->parseBody($data);
-                $result = $this->whatsAppService->send($candidate->phone, $message);
+                if ($whatsappTemplate->twilio_content_sid) {
+                    // Using Content API (pre-approved template)
+                    $placeholders = $whatsappTemplate->getPlaceholders();
+                    $contentVariables = [];
+                    foreach ($placeholders as $placeholder) {
+                        $contentVariables[$placeholder] = (string) ($data[$placeholder] ?? "N/A");
+                    }
+                    $result = $this->whatsAppService->sendWithContentTemplate($candidate->phone, $whatsappTemplate, $contentVariables);
+                } else {
+                    // Plain text fallback
+                    $message = $whatsappTemplate->parseBody($data);
+                    $result = $this->whatsAppService->send($candidate->phone, $message);
+                }
                 $this->logNotification($candidate->id, 'whatsapp', $statusKey, $whatsappTemplate->id, $result, $candidate->phone);
             }
         }
