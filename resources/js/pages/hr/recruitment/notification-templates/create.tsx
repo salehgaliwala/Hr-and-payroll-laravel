@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { RichTextField } from '@/components/ui/rich-text-field';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -173,15 +174,22 @@ export default function NotificationTemplateCreate() {
 
                 <div>
                   <Label>{t('Template Body')}</Label>
-                  <Textarea
-                    value={data.body}
-                    onChange={(e) => setData('body', e.target.value)}
-                    rows={12}
-                    placeholder={data.type === 'email'
-                      ? t('Enter email body with {{placeholder}}...')
-                      : t('Enter WhatsApp message with {{1}}, {{2}}...')}
-                    className="font-mono text-sm"
-                  />
+                  {data.type === 'email' ? (
+                    <RichTextField
+                      value={data.body}
+                      onChange={(value) => setData('body', value)}
+                      placeholder={t('Enter email body with {{placeholder}}...')}
+                      error={errors.body}
+                    />
+                  ) : (
+                    <Textarea
+                      value={data.body}
+                      onChange={(e) => setData('body', e.target.value)}
+                      rows={12}
+                      placeholder={t('Enter WhatsApp message with {{1}}, {{2}}...')}
+                      className="font-mono text-sm"
+                    />
+                  )}
                   {errors.body && <p className="text-sm text-red-500 mt-1">{errors.body}</p>}
                 </div>
 
