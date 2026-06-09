@@ -55,9 +55,6 @@ export default function NotificationTemplateCreate() {
       const uniquePlaceholders = Array.from(new Set(matches.map(m => m.replace(/\{\{|\}\}/g, ''))));
 
       const newSampleData = [...data.sample_data];
-      // Note: For named placeholders, sample data handling might need to change from index-based
-      // to object-based if Twilio requires it, but the service uses index-based for now.
-      // Keeping it simple for UI consistency.
       if (newSampleData.length < uniquePlaceholders.length) {
         for (let i = newSampleData.length; i < uniquePlaceholders.length; i++) {
           newSampleData[i] = '';
