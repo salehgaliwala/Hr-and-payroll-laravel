@@ -71,6 +71,16 @@ export default function ShowOffer() {
               </div>
 
               <div className="flex items-start gap-3">
+                <DollarSign className="h-5 w-5 text-gray-500 dark:text-gray-400 mt-0.5" />
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wide">{t('Bonus')}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1">
+                    {offer.bonus ? window.appSettings?.formatCurrency(offer.bonus) : '-'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
                 <FileText className="h-5 w-5 text-gray-500 dark:text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wide">{t('Position')}</p>
@@ -149,6 +159,34 @@ export default function ShowOffer() {
                 <div>
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wide">{t('Approved By')}</p>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1">{offer.approver?.name || '-'}</p>
+                </div>
+              )}
+
+              {offer.manager_id && (
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wide">{t('Manager')}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1">{offer.manager?.name || '-'}</p>
+                </div>
+              )}
+
+              {offer.probation_period && (
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wide">{t('Probation Period')}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1">{offer.probation_period}</p>
+                </div>
+              )}
+
+              {offer.notice_period && (
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wide">{t('Notice Period')}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1">{offer.notice_period}</p>
+                </div>
+              )}
+
+              {offer.working_hrs && (
+                <div>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wide">{t('Working Hours')}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1">{offer.working_hrs}</p>
                 </div>
               )}
 

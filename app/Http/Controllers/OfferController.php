@@ -17,7 +17,7 @@ class OfferController extends Controller
     public function index(Request $request)
     {
         if (Auth::user()->can('manage-offers')) {
-            $query = Offer::with(['candidate', 'job', 'department', 'approver'])->where(function ($q) {
+            $query = Offer::with(['candidate', 'job', 'department', 'approver', 'manager'])->where(function ($q) {
                 if (Auth::user()->can('manage-any-offers')) {
                     $q->whereIn('created_by', getCompanyAndUsersId());
                 } elseif (Auth::user()->can('manage-own-offers')) {
@@ -94,10 +94,15 @@ class OfferController extends Controller
             'position' => 'required',
             'department_id' => 'nullable|exists:departments,id',
             'salary' => 'required|numeric|min:0',
+            'bonus' => 'nullable|numeric|min:0',
             'benefits' => 'nullable|string',
             'start_date' => 'required|date|after_or_equal:today',
             'expiration_date' => 'required|date|after_or_equal:today',
             'approved_by' => 'nullable|exists:users,id',
+            'manager_id' => 'nullable|exists:users,id',
+            'probation_period' => 'nullable|string|max:255',
+            'notice_period' => 'nullable|string|max:255',
+            'working_hrs' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -123,10 +128,15 @@ class OfferController extends Controller
             'position' => $request->position,
             'department_id' => $request->department_id,
             'salary' => $request->salary,
+            'bonus' => $request->bonus,
             'benefits' => $request->benefits,
             'start_date' => $request->start_date,
             'expiration_date' => $request->expiration_date,
             'approved_by' => $request->approved_by,
+            'manager_id' => $request->manager_id,
+            'probation_period' => $request->probation_period,
+            'notice_period' => $request->notice_period,
+            'working_hrs' => $request->working_hrs,
             'created_by' => creatorId(),
         ]);
 
@@ -144,10 +154,15 @@ class OfferController extends Controller
             'position' => 'required|string|max:255',
             'department_id' => 'nullable|exists:departments,id',
             'salary' => 'required|numeric|min:0',
+            'bonus' => 'nullable|numeric|min:0',
             'benefits' => 'nullable|string',
             'start_date' => 'required|date',
             'expiration_date' => 'required|date',
             'approved_by' => 'nullable|exists:users,id',
+            'manager_id' => 'nullable|exists:users,id',
+            'probation_period' => 'nullable|string|max:255',
+            'notice_period' => 'nullable|string|max:255',
+            'working_hrs' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -173,10 +188,15 @@ class OfferController extends Controller
             'position' => $request->position,
             'department_id' => $request->department_id,
             'salary' => $request->salary,
+            'bonus' => $request->bonus,
             'benefits' => $request->benefits,
             'start_date' => $request->start_date,
             'expiration_date' => $request->expiration_date,
             'approved_by' => $request->approved_by,
+            'manager_id' => $request->manager_id,
+            'probation_period' => $request->probation_period,
+            'notice_period' => $request->notice_period,
+            'working_hrs' => $request->working_hrs,
         ]);
 
         return redirect()->back()->with('success', __('Offer updated successfully'));
@@ -188,7 +208,7 @@ class OfferController extends Controller
             return redirect()->back()->with('error', __('You do not have permission to view this offer'));
         }
 
-        $offer->load(['candidate', 'job', 'department', 'approver']);
+        $offer->load(['candidate', 'job', 'department', 'approver', 'manager']);
 
         return Inertia::render('hr/recruitment/offers/show', [
             'offer' => $offer,
