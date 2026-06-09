@@ -24,11 +24,11 @@ class TwilioContentService
     /**
      * Submit a WhatsApp template to Twilio Content API for Meta approval.
      *
-     * @param WhatsappTemplate $template
+     * @param mixed $template WhatsappTemplate or NotificationTemplate
      * @param array $placeholderSamples Sample values for {{1}}, {{2}}, etc.
      * @return array ['success' => bool, 'content_sid' => string|null, 'error' => string|null]
      */
-    public function submitTemplateToTwilio(WhatsappTemplate $template, array $placeholderSamples = []): array
+    public function submitTemplateToTwilio($template, array $placeholderSamples = []): array
     {
         if (empty($this->sid) || empty($this->authToken)) {
             return [
@@ -46,12 +46,15 @@ class TwilioContentService
             $samples[] = $placeholderSamples[$index] ?? "Sample {$placeholder}";
         }
 
+        $friendlyName = $template->friendly_name ?? $template->name;
+        $bodyText = $template->body_text ?? $template->body;
+
         $payload = [
-            'friendly_name' => $template->friendly_name,
+            'friendly_name' => $friendlyName,
             'language' => $template->language,
             'types' => [
                 'twilio/text' => [
-                    'body' => $template->body_text,
+                    'body' => $bodyText,
                 ],
             ],
         ];
@@ -60,12 +63,12 @@ class TwilioContentService
         if (!empty($samples)) {
             $payload['approval_requests'] = [
                 [
-                    'name' => $template->friendly_name,
+                    'name' => $friendlyName,
                     'category' => $template->category,
                     'components' => [
                         [
                             'type' => 'BODY',
-                            'text' => $template->body_text,
+                            'text' => $bodyText,
                             'example' => [
                                 'body_text' => [$samples],
                             ],
@@ -85,7 +88,7 @@ class TwilioContentService
                 $contentSid = $responseData['sid'] ?? null;
 
                 Log::info('Twilio Content API: Template submitted successfully', [
-                    'friendly_name' => $template->friendly_name,
+                    'friendly_name' => $friendlyName,
                     'content_sid' => $contentSid,
                 ]);
 
@@ -98,7 +101,7 @@ class TwilioContentService
 
             $errorBody = $response->body();
             Log::error('Twilio Content API: Submission failed', [
-                'friendly_name' => $template->friendly_name,
+                'friendly_name' => $friendlyName,
                 'status' => $response->status(),
                 'response' => $errorBody,
             ]);
@@ -110,7 +113,7 @@ class TwilioContentService
             ];
         } catch (\Exception $e) {
             Log::error('Twilio Content API: Exception during submission', [
-                'friendly_name' => $template->friendly_name,
+                'friendly_name' => $friendlyName,
                 'error' => $e->getMessage(),
             ]);
 
@@ -159,13 +162,6 @@ class TwilioContentService
             return ['success' => false, 'error' => 'Invalid webhook payload.'];
         }
 
-        $template = WhatsappTemplate::where('twilio_content_sid', $contentSid)->first();
-
-        if (!$template) {
-            Log::warning('Twilio webhook: Template not found', ['content_sid' => $contentSid]);
-            return ['success' => false, 'error' => 'Template not found.'];
-        }
-
         $statusMap = [
             'approved' => 'approved',
             'rejected' => 'rejected',
@@ -174,17 +170,39 @@ class TwilioContentService
         ];
 
         $newStatus = $statusMap[$approvalStatus] ?? 'pending';
-        $updateData = ['status' => $newStatus];
 
-        if ($newStatus === 'rejected' && !empty($payload['rejection_reason'])) {
-            $updateData['rejection_reason'] = $payload['rejection_reason'];
+        $template = \App\Models\WhatsappTemplate::where('twilio_content_sid', $contentSid)->first();
+        if ($template) {
+            $updateData = ['status' => $newStatus];
+            if ($newStatus === 'rejected' && !empty($payload['rejection_reason'])) {
+                $updateData['rejection_reason'] = $payload['rejection_reason'];
+            }
+            $template->update($updateData);
+        } else {
+            $template = \App\Models\NotificationTemplate::where('twilio_content_sid', $contentSid)->first();
+            if ($template) {
+                $updateData = ['approval_status' => $newStatus];
+                if ($newStatus === 'rejected' && !empty($payload['rejection_reason'])) {
+                    $updateData['rejection_reason'] = $payload['rejection_reason'];
+                }
+                // If approved, we might NOT automatically enable it, but the requirement said
+                // "remain disabled and uneditable until a successful approval callback/response is received"
+                // It doesn't explicitly say to enable it, but typically approved templates are ready to use.
+                // I'll leave is_active as it was or maybe set it if appropriate.
+                // For now, just update approval_status.
+                $template->update($updateData);
+            }
         }
 
-        $template->update($updateData);
+        if (!$template) {
+            Log::warning('Twilio webhook: Template not found', ['content_sid' => $contentSid]);
+            return ['success' => false, 'error' => 'Template not found.'];
+        }
 
         Log::info('Twilio webhook: Template status updated', [
             'content_sid' => $contentSid,
             'status' => $newStatus,
+            'model' => get_class($template),
         ]);
 
         return ['success' => true, 'error' => null];

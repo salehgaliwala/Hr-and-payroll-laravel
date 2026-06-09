@@ -809,6 +809,8 @@ Route::middleware(['auth', 'verified', 'setting'])->group(function () {
         // Notification Templates Routes
         Route::middleware('permission:manage-notification-templates')->group(function () {
             Route::get('hr/recruitment/notification-templates', [\App\Http\Controllers\NotificationTemplateController::class, 'index'])->name('hr.recruitment.notification-templates.index');
+            Route::get('hr/recruitment/notification-templates/create', [\App\Http\Controllers\NotificationTemplateController::class, 'create'])->name('hr.recruitment.notification-templates.create');
+            Route::post('hr/recruitment/notification-templates', [\App\Http\Controllers\NotificationTemplateController::class, 'store'])->name('hr.recruitment.notification-templates.store');
             Route::get('hr/recruitment/notification-templates/{notificationTemplate}/edit', [\App\Http\Controllers\NotificationTemplateController::class, 'edit'])->name('hr.recruitment.notification-templates.edit');
             Route::put('hr/recruitment/notification-templates/{notificationTemplate}', [\App\Http\Controllers\NotificationTemplateController::class, 'update'])->name('hr.recruitment.notification-templates.update');
             Route::put('hr/recruitment/notification-templates/{notificationTemplate}/toggle-status', [\App\Http\Controllers\NotificationTemplateController::class, 'toggleStatus'])->name('hr.recruitment.notification-templates.toggle-status');
