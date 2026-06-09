@@ -58,8 +58,8 @@ class OfferController extends Controller
                 ->get();
 
             $employees = User::whereIn('created_by', getCompanyAndUsersId())
-                ->whereIn('type', ['manager', 'hr'])
-                ->select('id', 'name')
+                ->whereIn('type', ['manager', 'hr', 'company'])
+                ->select('id', 'name', 'type')
                 ->get();
 
             $jobPostings = JobPosting::whereIn('created_by', getCompanyAndUsersId())
@@ -73,11 +73,17 @@ class OfferController extends Controller
                 $employees->push($currentUser);
             }
 
+            $managers = User::whereIn('created_by', getCompanyAndUsersId())
+                ->where('type', 'manager')
+                ->select('id', 'name')
+                ->get();
+
             return Inertia::render('hr/recruitment/offers/index', [
                 'offers' => $offers,
                 'candidates' => $candidates,
                 'departments' => $departments,
                 'employees' => $employees,
+                'managers' => $managers,
                 'jobPostings' => $jobPostings,
                 'currentUser' => auth()->user(),
                 'filters' => $request->all(['search', 'status', 'candidate_id', 'per_page']),

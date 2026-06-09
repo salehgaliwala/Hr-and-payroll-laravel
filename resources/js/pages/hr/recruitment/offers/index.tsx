@@ -15,7 +15,7 @@ import axios from 'axios';
 
 export default function Offers() {
   const { t } = useTranslation();
-  const { auth, offers, candidates, departments, employees, jobPostings, currentUser, filters: pageFilters = {}, globalSettings } = usePage().props as any;
+  const { auth, offers, candidates, departments, employees, managers, jobPostings, currentUser, filters: pageFilters = {}, globalSettings } = usePage().props as any;
   const permissions = auth?.permissions || [];
 
   const [searchTerm, setSearchTerm] = useState(pageFilters.search || '');
@@ -369,6 +369,14 @@ export default function Offers() {
     }))
   ];
 
+  const managerOptions = [
+    { value: '_empty_', label: t('Select Manager') },
+    ...(managers || []).map((mgr: any) => ({
+      value: mgr.id.toString(),
+      label: mgr.name
+    }))
+  ];
+
   return (
     <PageTemplate
       title={t("Offers")}
@@ -536,7 +544,7 @@ export default function Offers() {
               type: 'select',
               required: false,
               placeholder: t('Select Manager'),
-              options: employeeOptions.filter(opt => opt.value !== '_empty_')
+              options: managerOptions.filter(opt => opt.value !== '_empty_')
             },
             {
               name: 'probation_period',
