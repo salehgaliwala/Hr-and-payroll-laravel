@@ -21,6 +21,10 @@ class Offer extends BaseModel
         'benefits',
         'start_date',
         'expiration_date',
+        'manager_id',
+        'probation_period',
+        'notice_period',
+        'working_hrs',
         'offer_letter_path',
         'status',
         'response_date',
@@ -61,5 +65,10 @@ class Offer extends BaseModel
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function manager()
+    {
+        return $this->belongsTo(User::class, 'manager_id');
     }
 }

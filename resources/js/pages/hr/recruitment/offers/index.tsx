@@ -362,7 +362,7 @@ export default function Offers() {
   ];
 
   const employeeOptions = [
-    { value: '_empty_', label: t('Select Approver') },
+    { value: '_empty_', label: t('Select User') },
     ...(employees || []).map((emp: any) => ({
       value: emp.id.toString(),
       label: `${emp.name} - ${auth?.user?.name || 'Company'}`
@@ -499,6 +499,15 @@ export default function Offers() {
               placeholder: t('e.g. 5000.00')
             },
             {
+              name: 'bonus',
+              label: t('Bonus'),
+              type: 'number',
+              required: false,
+              min: 0,
+              step: 0.01,
+              placeholder: t('e.g. 1000.00')
+            },
+            {
               name: 'start_date',
               label: t('Start Date'),
               type: 'date',
@@ -520,6 +529,35 @@ export default function Offers() {
               placeholder: t('Select Approver'),
               options: employeeOptions.filter(opt => opt.value !== '_empty_'),
               defaultValue: currentUser?.id?.toString()
+            },
+            {
+              name: 'manager_id',
+              label: t('Manager'),
+              type: 'select',
+              required: false,
+              placeholder: t('Select Manager'),
+              options: employeeOptions.filter(opt => opt.value !== '_empty_')
+            },
+            {
+              name: 'probation_period',
+              label: t('Probation Period'),
+              type: 'text',
+              required: false,
+              placeholder: t('e.g. 3 months')
+            },
+            {
+              name: 'notice_period',
+              label: t('Notice Period'),
+              type: 'text',
+              required: false,
+              placeholder: t('e.g. 1 month')
+            },
+            {
+              name: 'working_hrs',
+              label: t('Working Hours'),
+              type: 'text',
+              required: false,
+              placeholder: t('e.g. 40 hours per week')
             },
             {
               name: 'benefits',
