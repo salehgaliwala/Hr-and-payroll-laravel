@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Sync Twilio WhatsApp template statuses hourly
+        $schedule->command('twilio:sync-templates')->hourly();
     }
 
     /**
