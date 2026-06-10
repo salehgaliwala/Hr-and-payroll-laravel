@@ -92,6 +92,16 @@ class TwilioContentService
                     'content_sid' => $contentSid,
                 ]);
 
+                $approvalResult = $this->submitForApproval($contentSid, $template, $placeholderSamples);
+
+                if (!$approvalResult['success']) {
+                    return [
+                        'success' => true,
+                        'content_sid' => $contentSid,
+                        'error' => "Content created but approval submission failed: " . $approvalResult['error'],
+                    ];
+                }
+
                 return [
                     'success' => true,
                     'content_sid' => $contentSid,
@@ -126,6 +136,67 @@ class TwilioContentService
     }
 
     /**
+     * Submit an existing Content resource for WhatsApp approval.
+     *
+     * @param string $contentSid
+     * @param mixed $template
+     * @param array $placeholderSamples
+     * @return array
+     */
+    public function submitForApproval(string $contentSid, $template, array $placeholderSamples = []): array
+    {
+        if (empty($this->sid) || empty($this->authToken)) {
+            return ['success' => false, 'error' => 'Twilio credentials not configured.'];
+        }
+
+        // Prepare sample data
+        $placeholders = $template->getPlaceholders();
+        $samples = [];
+        foreach ($placeholders as $placeholder) {
+            $index = (int) $placeholder - 1;
+            $samples[] = $placeholderSamples[$index] ?? "Sample {$placeholder}";
+        }
+
+        $friendlyName = $template->friendly_name ?? $template->name;
+
+        $payload = [
+            'name' => $friendlyName,
+            'category' => $template->category,
+        ];
+
+        if (!empty($samples)) {
+            $payload['components'] = [
+                [
+                    'type' => 'BODY',
+                    'example' => [
+                        'body_text' => [$samples],
+                    ],
+                ],
+            ];
+        }
+
+        try {
+            $response = Http::withBasicAuth($this->sid, $this->authToken)
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->post("{$this->baseUrl}/Content/{$contentSid}/ApprovalRequests/whatsapp", $payload);
+
+            if ($response->successful()) {
+                Log::info('Twilio Content API: Approval requested successfully', [
+                    'content_sid' => $contentSid,
+                ]);
+                return ['success' => true];
+            }
+
+            return [
+                'success' => false,
+                'error' => "Twilio Approval Error ({$response->status()}): " . $response->body(),
+            ];
+        } catch (\Exception $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Update the webhook URL for receiving template approval status callbacks.
      */
     public function updateWebhookUrl(string $webhookUrl): array
@@ -145,6 +216,46 @@ class TwilioContentService
                 'success' => false,
                 'error' => "Failed to update webhook: {$response->body()}",
             ];
+        } catch (\Exception $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Fetch the current approval status of a template from Twilio.
+     *
+     * @param string $contentSid
+     * @return array ['success' => bool, 'status' => string|null, 'rejection_reason' => string|null, 'error' => string|null]
+     */
+    public function fetchTemplateStatus(string $contentSid): array
+    {
+        if (empty($this->sid) || empty($this->authToken)) {
+            return ['success' => false, 'error' => 'Twilio credentials not configured.'];
+        }
+
+        try {
+            $response = Http::withBasicAuth($this->sid, $this->authToken)
+                ->get("{$this->baseUrl}/Content/{$contentSid}/ApprovalRequests");
+
+            if ($response->successful()) {
+                $data = $response->json();
+                // Twilio returns a list of approval requests. We're interested in 'whatsapp'.
+                $whatsappApproval = collect($data['approval_requests'] ?? [])
+                    ->where('name', 'whatsapp')
+                    ->first();
+
+                if ($whatsappApproval) {
+                    return [
+                        'success' => true,
+                        'status' => $whatsappApproval['status'] ?? 'pending',
+                        'rejection_reason' => $whatsappApproval['rejection_reason'] ?? null,
+                    ];
+                }
+
+                return ['success' => false, 'error' => 'WhatsApp approval request not found for this content.'];
+            }
+
+            return ['success' => false, 'error' => "Twilio error: " . $response->body()];
         } catch (\Exception $e) {
             return ['success' => false, 'error' => $e->getMessage()];
         }

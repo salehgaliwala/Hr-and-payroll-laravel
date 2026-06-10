@@ -1,4 +1,5 @@
 {
+    "name": "hr",
     "private": true,
     "type": "module",
     "scripts": {
