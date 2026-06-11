@@ -129,7 +129,7 @@ class WhatsAppService
                     'From' => $from,
                     'To' => $toNumber,
                     'ContentSid' => $template->twilio_content_sid,
-                    'ContentVariables' => json_encode($contentVariables),
+                    'ContentVariables' => json_encode($contentVariables, JSON_FORCE_OBJECT),
                 ]);
 
             if ($response->successful()) {
