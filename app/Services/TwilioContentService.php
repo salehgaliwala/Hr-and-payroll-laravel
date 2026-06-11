@@ -66,6 +66,13 @@ class TwilioContentService
         ];
 
         try {
+            Log::debug('Twilio Content API: Submitting template', [
+                'friendly_name' => $friendlyName,
+                'language' => $template->language,
+                'category' => $template->category ?? 'not_set',
+                'payload_body_preview' => mb_substr($twilioBody, 0, 200),
+            ]);
+
             $response = Http::withBasicAuth($this->sid, $this->authToken)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post("{$this->baseUrl}/Content", $payload);
@@ -77,6 +84,7 @@ class TwilioContentService
                 Log::info('Twilio Content API: Template submitted successfully', [
                     'friendly_name' => $friendlyName,
                     'content_sid' => $contentSid,
+                    'full_response' => $responseData,
                 ]);
 
                 // Wait a moment for Twilio to process the creation before approval request
@@ -165,22 +173,42 @@ class TwilioContentService
         }
 
         try {
+            Log::debug('Twilio Content API: Submitting for approval', [
+                'content_sid' => $contentSid,
+                'category' => $template->category,
+                'name' => $friendlyName,
+                'sample_count' => count($samples),
+            ]);
+
             $response = Http::withBasicAuth($this->sid, $this->authToken)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post("{$this->baseUrl}/Content/{$contentSid}/ApprovalRequests/whatsapp", $payload);
 
             if ($response->successful()) {
+                $responseData = $response->json();
                 Log::info('Twilio Content API: Approval requested successfully', [
                     'content_sid' => $contentSid,
+                    'full_response' => $responseData,
                 ]);
                 return ['success' => true];
             }
 
+            $errorBody = $response->body();
+            Log::error('Twilio Content API: Approval request failed', [
+                'content_sid' => $contentSid,
+                'status' => $response->status(),
+                'response' => $errorBody,
+            ]);
+
             return [
                 'success' => false,
-                'error' => "Twilio Approval Error ({$response->status()}): " . $response->body(),
+                'error' => "Twilio Approval Error ({$response->status()}): {$errorBody}",
             ];
         } catch (\Exception $e) {
+            Log::error('Twilio Content API: Exception during approval submission', [
+                'content_sid' => $contentSid,
+                'error' => $e->getMessage(),
+            ]);
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }

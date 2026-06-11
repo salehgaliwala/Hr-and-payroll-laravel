@@ -7,6 +7,7 @@ use App\Models\WhatsappTemplate;
 use App\Services\TwilioContentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 
@@ -144,12 +145,33 @@ class NotificationTemplateController extends Controller
                 $request->sample_data ?? []
             );
 
+            Log::debug('NotificationTemplateController: Twilio submission result', [
+                'template_id' => $template->id,
+                'template_name' => $template->name,
+                'result_success' => $result['success'],
+                'result_content_sid' => $result['content_sid'],
+                'result_error' => $result['error'],
+                'twilio_sid_configured' => config('twilio.sid') ? getSetting('twilio_sid', '') : 'from_config',
+                'twilio_auth_configured' => !empty(config('twilio.auth_token')) || !empty(getSetting('twilio_auth_token', '')),
+            ]);
+
             if ($result['success']) {
                 $template->update([
                     'twilio_content_sid' => $result['content_sid'],
                     'approval_status' => NotificationTemplate::APPROVAL_PENDING,
                 ]);
+
+                Log::info('NotificationTemplateController: Template submitted to Twilio successfully', [
+                    'template_id' => $template->id,
+                    'twilio_content_sid' => $result['content_sid'],
+                ]);
             } else {
+                Log::warning('NotificationTemplateController: Template submission to Twilio failed', [
+                    'template_id' => $template->id,
+                    'template_name' => $template->name,
+                    'error' => $result['error'],
+                ]);
+
                 session()->flash('warning', __('Template saved locally but submission to Twilio failed: :error', [
                     'error' => $result['error'],
                 ]));
