@@ -80,25 +80,22 @@ class WhatsappTemplateController extends Controller
             'created_by' => Auth::id(),
         ]);
 
-        // Submit to Twilio Content API if credentials are configured
-        $twilioSid = config('twilio.sid') ?: getSetting('twilio_sid', '');
-        if (!empty($twilioSid)) {
-            $result = $this->twilioContentService->submitTemplateToTwilio(
-                $template,
-                $request->sample_data ?? []
-            );
+        // Submit to Twilio Content API
+        $result = $this->twilioContentService->submitTemplateToTwilio(
+            $template,
+            $request->sample_data ?? []
+        );
 
-            if ($result['success']) {
-                $template->update([
-                    'twilio_content_sid' => $result['content_sid'],
-                    'status' => 'pending',
-                ]);
-            } else {
-                // Keep as draft with a note that submission failed
-                session()->flash('warning', __('Template saved locally but submission to Twilio failed: :error', [
-                    'error' => $result['error'],
-                ]));
-            }
+        if ($result['success']) {
+            $template->update([
+                'twilio_content_sid' => $result['content_sid'],
+                'status' => 'pending',
+            ]);
+        } else {
+            // Keep as draft with a note that submission failed
+            session()->flash('warning', __('Template saved locally but submission to Twilio failed: :error', [
+                'error' => $result['error'],
+            ]));
         }
 
         return redirect()->route('hr.recruitment.whatsapp-templates.index')

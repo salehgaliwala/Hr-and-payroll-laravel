@@ -134,27 +134,25 @@ class NotificationTemplateController extends Controller
             'subject' => $request->subject,
             'body' => $request->body,
             'is_active' => $isWhatsapp ? false : true,
-            'approval_status' => $isWhatsapp ? NotificationTemplate::APPROVAL_PENDING : NotificationTemplate::APPROVAL_APPROVED,
+            'approval_status' => $isWhatsapp ? NotificationTemplate::APPROVAL_DRAFT : NotificationTemplate::APPROVAL_APPROVED,
             'created_by' => Auth::id(),
         ]);
 
         if ($isWhatsapp) {
-            $twilioSid = config('twilio.sid') ?: getSetting('twilio_sid', '');
-            if (!empty($twilioSid)) {
-                $result = $this->twilioContentService->submitTemplateToTwilio(
-                    $template,
-                    $request->sample_data ?? []
-                );
+            $result = $this->twilioContentService->submitTemplateToTwilio(
+                $template,
+                $request->sample_data ?? []
+            );
 
-                if ($result['success']) {
-                    $template->update([
-                        'twilio_content_sid' => $result['content_sid'],
-                    ]);
-                } else {
-                    session()->flash('warning', __('Template saved locally but submission to Twilio failed: :error', [
-                        'error' => $result['error'],
-                    ]));
-                }
+            if ($result['success']) {
+                $template->update([
+                    'twilio_content_sid' => $result['content_sid'],
+                    'approval_status' => NotificationTemplate::APPROVAL_PENDING,
+                ]);
+            } else {
+                session()->flash('warning', __('Template saved locally but submission to Twilio failed: :error', [
+                    'error' => $result['error'],
+                ]));
             }
         }
 
