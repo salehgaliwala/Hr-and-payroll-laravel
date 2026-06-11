@@ -16,9 +16,9 @@ class TwilioContentService
     public function __construct()
     {
         $this->baseUrl = config('twilio.content_api_base', 'https://content.twilio.com/v1');
-        $this->sid = config('twilio.sid');
-        $this->authToken = config('twilio.auth_token');
-        $this->webhookUrl = config('twilio.webhook_url');
+        $this->sid = config('twilio.sid') ?: getSetting('twilio_sid', '');
+        $this->authToken = config('twilio.auth_token') ?: getSetting('twilio_auth_token', '');
+        $this->webhookUrl = config('twilio.webhook_url') ?: getSetting('twilio_webhook_url', '');
     }
 
     /**
@@ -38,45 +38,32 @@ class TwilioContentService
             ];
         }
 
-        // Prepare sample data: use provided samples or generate defaults
+        // 1. Get raw body and strip HTML tags (for WYSIWYG support)
+        $rawBody = $template->body_text ?? $template->body;
+        $cleanBody = strip_tags(str_replace(['<br>', '<br/>', '<br />', '</p>'], "\n", $rawBody));
+
+        // 2. Identify all placeholders and map them to numbered indices for Twilio
         $placeholders = $template->getPlaceholders();
+        $twilioBody = $cleanBody;
         $samples = [];
-        foreach ($placeholders as $placeholder) {
-            $index = (int) $placeholder - 1;
-            $samples[] = $placeholderSamples[$index] ?? "Sample {$placeholder}";
+
+        foreach ($placeholders as $index => $name) {
+            $twilioIndex = $index + 1;
+            $twilioBody = str_replace('{{' . $name . '}}', '{{' . $twilioIndex . '}}', $twilioBody);
+            $samples[] = $placeholderSamples[$index] ?? (isset($placeholderSamples[$name]) ? $placeholderSamples[$name] : "Sample {$name}");
         }
 
         $friendlyName = $template->friendly_name ?? $template->name;
-        $bodyText = $template->body_text ?? $template->body;
 
         $payload = [
             'friendly_name' => $friendlyName,
             'language' => $template->language,
             'types' => [
                 'twilio/text' => [
-                    'body' => $bodyText,
+                    'body' => $twilioBody,
                 ],
             ],
         ];
-
-        // Add approval request with sample data
-        if (!empty($samples)) {
-            $payload['approval_requests'] = [
-                [
-                    'name' => $friendlyName,
-                    'category' => $template->category,
-                    'components' => [
-                        [
-                            'type' => 'BODY',
-                            'text' => $bodyText,
-                            'example' => [
-                                'body_text' => [$samples],
-                            ],
-                        ],
-                    ],
-                ],
-            ];
-        }
 
         try {
             $response = Http::withBasicAuth($this->sid, $this->authToken)
@@ -92,13 +79,16 @@ class TwilioContentService
                     'content_sid' => $contentSid,
                 ]);
 
+                // Wait a moment for Twilio to process the creation before approval request
+                usleep(500000); // 0.5 seconds
+
                 $approvalResult = $this->submitForApproval($contentSid, $template, $placeholderSamples);
 
                 if (!$approvalResult['success']) {
                     return [
-                        'success' => true,
+                        'success' => false,
                         'content_sid' => $contentSid,
-                        'error' => "Content created but approval submission failed: " . $approvalResult['error'],
+                        'error' => "Content created ({$contentSid}) but approval submission failed: " . $approvalResult['error'],
                     ];
                 }
 
@@ -149,12 +139,11 @@ class TwilioContentService
             return ['success' => false, 'error' => 'Twilio credentials not configured.'];
         }
 
-        // Prepare sample data
+        // Prepare sample data mapping
         $placeholders = $template->getPlaceholders();
         $samples = [];
-        foreach ($placeholders as $placeholder) {
-            $index = (int) $placeholder - 1;
-            $samples[] = $placeholderSamples[$index] ?? "Sample {$placeholder}";
+        foreach ($placeholders as $index => $name) {
+            $samples[] = $placeholderSamples[$index] ?? (isset($placeholderSamples[$name]) ? $placeholderSamples[$name] : "Sample {$name}");
         }
 
         $friendlyName = $template->friendly_name ?? $template->name;

@@ -54,12 +54,12 @@ class WhatsappTemplate extends Model
     }
 
     /**
-     * Extract placeholders like {{1}}, {{2}} from body_text.
+     * Extract placeholders like {{first_name}}, {{1}} etc from body_text.
      */
     public function getPlaceholders(): array
     {
-        preg_match_all('/\{\{(\d+)\}\}/', $this->body_text, $matches);
-        return $matches[1] ?? [];
+        preg_match_all('/\{\{(.+?)\}\}/', $this->body_text, $matches);
+        return array_unique($matches[1] ?? []);
     }
 
     /**
