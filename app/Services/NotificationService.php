@@ -93,10 +93,12 @@ class NotificationService
             if ($whatsappTemplate) {
                 if ($whatsappTemplate->twilio_content_sid) {
                     // Using Content API (pre-approved template)
+                    // ContentVariables must use numeric keys (1, 2, 3...) matching the {{1}}, {{2}}
+                    // placeholders that were stored in Twilio's Content API template body.
                     $placeholders = $whatsappTemplate->getPlaceholders();
                     $contentVariables = [];
-                    foreach ($placeholders as $placeholder) {
-                        $contentVariables[$placeholder] = (string) ($data[$placeholder] ?? "N/A");
+                    foreach ($placeholders as $index => $placeholder) {
+                        $contentVariables[$index + 1] = (string) ($data[$placeholder] ?? "N/A");
                     }
                     $result = $this->whatsAppService->sendWithContentTemplate($candidate->phone, $whatsappTemplate, $contentVariables);
                 } else {
