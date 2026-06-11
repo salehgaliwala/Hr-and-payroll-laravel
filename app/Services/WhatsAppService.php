@@ -123,14 +123,28 @@ class WhatsAppService
         }
 
         try {
+            $contentVariablesJson = json_encode($contentVariables, JSON_FORCE_OBJECT);
+
+            Log::debug('Sending WhatsApp template message', [
+                'to' => $toNumber,
+                'from' => $from,
+                'content_sid' => $template->twilio_content_sid,
+                'content_variables' => $contentVariablesJson,
+            ]);
+
+            $params = [
+                'From' => $from,
+                'To' => $toNumber,
+                'ContentSid' => $template->twilio_content_sid,
+            ];
+
+            if (!empty($contentVariables)) {
+                $params['ContentVariables'] = $contentVariablesJson;
+            }
+
             $response = Http::withBasicAuth($this->sid, $this->authToken)
                 ->asForm()
-                ->post("https://api.twilio.com/2010-04-01/Accounts/{$this->sid}/Messages.json", [
-                    'From' => $from,
-                    'To' => $toNumber,
-                    'ContentSid' => $template->twilio_content_sid,
-                    'ContentVariables' => json_encode($contentVariables, JSON_FORCE_OBJECT),
-                ]);
+                ->post("https://api.twilio.com/2010-04-01/Accounts/{$this->sid}/Messages.json", $params);
 
             if ($response->successful()) {
                 Log::info('WhatsApp template message sent successfully', [
