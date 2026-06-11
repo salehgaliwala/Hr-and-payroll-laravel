@@ -97,12 +97,12 @@ class NotificationService
                     // placeholders that were stored in Twilio's Content API template body.
                     $placeholders = $whatsappTemplate->getPlaceholders();
                     $contentVariables = [];
-                    foreach ($placeholders as $index => $placeholder) {
+                    foreach ($placeholders as $placeholder) {
                         $value = (string) ($data[$placeholder] ?? "N/A");
                         // Twilio Content API does not allow newlines, tabs or multiple spaces in WhatsApp variable values
                         $value = str_replace(["\r", "\n", "\t"], ' ', $value);
                         $value = preg_replace('/\s+/', ' ', $value);
-                        $contentVariables[$index + 1] = trim($value);
+                        $contentVariables[$placeholder] = trim($value);
                     }
                     $result = $this->whatsAppService->sendWithContentTemplate($candidate->phone, $whatsappTemplate, $contentVariables);
                 } else {
