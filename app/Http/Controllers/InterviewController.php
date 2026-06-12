@@ -48,7 +48,7 @@ class InterviewController extends Controller
 
             $candidates = Candidate::whereIn('created_by', getCompanyAndUsersId())
                 ->select('id', 'first_name', 'last_name')
-                ->where('status', 'Interview')
+                ->where('status', 'Screening')
                 ->get();
 
             $interviewTypes = InterviewType::whereIn('created_by', getCompanyAndUsersId())
