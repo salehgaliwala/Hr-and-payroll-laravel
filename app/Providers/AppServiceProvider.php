@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Models\Plan;
+use App\Models\Offer;
 use App\Observers\UserObserver;
 use App\Observers\PlanObserver;
+use App\Observers\OfferObserver;
 use App\Providers\AssetServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -36,6 +38,9 @@ class AppServiceProvider extends ServiceProvider
         
         // Register the PlanObserver
         Plan::observe(PlanObserver::class);
+
+        // Register the OfferObserver
+        Offer::observe(OfferObserver::class);
 
         // Configure dynamic storage disks
         try {

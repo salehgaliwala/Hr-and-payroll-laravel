@@ -400,8 +400,11 @@ class CareerController extends Controller
 
             $candidate->save();
 
+            // Requirement 1: Trigger notification service with status_key 'new'
+            (new \App\Services\NotificationService())->sendApplicationConfirmation($candidate);
+
             // Dispatch event to send application confirmation notifications
-            CandidateApplied::dispatch($candidate);
+            // CandidateApplied::dispatch($candidate);
 
             return redirect()->back()
                 ->with('success', 'Your application has been submitted successfully! We will review it and get back to you soon.');
