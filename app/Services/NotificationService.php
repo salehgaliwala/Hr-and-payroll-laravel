@@ -117,11 +117,20 @@ class NotificationService
 
     /**
      * Send application confirmation notifications (email + WhatsApp).
-     * Uses status_key = 'applied'.
+     * Uses status_key = 'new'.
      */
     public function sendApplicationConfirmation(Candidate $candidate): void
     {
-        $this->sendByStatus($candidate, 'applied');
+        $this->sendByStatus($candidate, 'new');
+    }
+
+    /**
+     * Send hired notifications (email + WhatsApp).
+     * Uses status_key = 'hired'.
+     */
+    public function sendHiredNotification(Candidate $candidate): void
+    {
+        $this->sendByStatus($candidate, 'hired');
     }
 
     /**
