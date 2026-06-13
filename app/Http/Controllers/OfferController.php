@@ -47,7 +47,7 @@ class OfferController extends Controller
 
             $candidates = Candidate::with('job')
                 ->whereIn('created_by', getCompanyAndUsersId())
-                ->where('status', 'Offer')
+                ->where('status', 'Interview')
                 ->select('id', 'first_name', 'last_name', 'job_id')
                 ->get();
 
