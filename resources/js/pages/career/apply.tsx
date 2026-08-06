@@ -121,7 +121,7 @@ export default function JobApplication() {
           city: '',
           state: '',
           zip_code: '',
-          country: 'Afghanistan',
+          country: 'Democratic Republic of the Congo',
           gender: 'male',
           date_of_birth: '',
           current_position: '',
@@ -390,52 +390,8 @@ export default function JobApplication() {
                         <SelectValue placeholder={t('Select Country')} />
                       </SelectTrigger>
                       <SelectContent searchable={true}>
-                        <SelectItem value="Afghanistan">{t('Afghanistan')}</SelectItem>
-                        <SelectItem value="Albania">{t('Albania')}</SelectItem>
-                        <SelectItem value="Algeria">{t('Algeria')}</SelectItem>
-                        <SelectItem value="Argentina">{t('Argentina')}</SelectItem>
-                        <SelectItem value="Australia">{t('Australia')}</SelectItem>
-                        <SelectItem value="Belgium">{t('Belgium')}</SelectItem>
-                        <SelectItem value="Brazil">{t('Brazil')}</SelectItem>
-                        <SelectItem value="Canada">{t('Canada')}</SelectItem>
-                        <SelectItem value="China">{t('China')}</SelectItem>
-                        <SelectItem value="Colombia">{t('Colombia')}</SelectItem>
-                        <SelectItem value="Denmark">{t('Denmark')}</SelectItem>
-                        <SelectItem value="Egypt">{t('Egypt')}</SelectItem>
-                        <SelectItem value="Finland">{t('Finland')}</SelectItem>
-                        <SelectItem value="France">{t('France')}</SelectItem>
-                        <SelectItem value="Germany">{t('Germany')}</SelectItem>
-                        <SelectItem value="Greece">{t('Greece')}</SelectItem>
-                        <SelectItem value="India">{t('India')}</SelectItem>
-                        <SelectItem value="Indonesia">{t('Indonesia')}</SelectItem>
-                        <SelectItem value="Ireland">{t('Ireland')}</SelectItem>
-                        <SelectItem value="Italy">{t('Italy')}</SelectItem>
-                        <SelectItem value="Japan">{t('Japan')}</SelectItem>
-                        <SelectItem value="Kenya">{t('Kenya')}</SelectItem>
-                        <SelectItem value="Malaysia">{t('Malaysia')}</SelectItem>
-                        <SelectItem value="Mexico">{t('Mexico')}</SelectItem>
-                        <SelectItem value="Netherlands">{t('Netherlands')}</SelectItem>
-                        <SelectItem value="New Zealand">{t('New Zealand')}</SelectItem>
-                        <SelectItem value="Nigeria">{t('Nigeria')}</SelectItem>
-                        <SelectItem value="Norway">{t('Norway')}</SelectItem>
-                        <SelectItem value="Pakistan">{t('Pakistan')}</SelectItem>
-                        <SelectItem value="Philippines">{t('Philippines')}</SelectItem>
-                        <SelectItem value="Poland">{t('Poland')}</SelectItem>
-                        <SelectItem value="Portugal">{t('Portugal')}</SelectItem>
-                        <SelectItem value="Russia">{t('Russia')}</SelectItem>
-                        <SelectItem value="Saudi Arabia">{t('Saudi Arabia')}</SelectItem>
-                        <SelectItem value="Singapore">{t('Singapore')}</SelectItem>
-                        <SelectItem value="South Africa">{t('South Africa')}</SelectItem>
-                        <SelectItem value="South Korea">{t('South Korea')}</SelectItem>
-                        <SelectItem value="Spain">{t('Spain')}</SelectItem>
-                        <SelectItem value="Sweden">{t('Sweden')}</SelectItem>
-                        <SelectItem value="Switzerland">{t('Switzerland')}</SelectItem>
-                        <SelectItem value="Thailand">{t('Thailand')}</SelectItem>
-                        <SelectItem value="Turkey">{t('Turkey')}</SelectItem>
-                        <SelectItem value="United Arab Emirates">{t('United Arab Emirates')}</SelectItem>
-                        <SelectItem value="United Kingdom">{t('United Kingdom')}</SelectItem>
-                        <SelectItem value="United States">{t('United States')}</SelectItem>
-                        <SelectItem value="Vietnam">{t('Vietnam')}</SelectItem>
+                        <SelectItem value="Democratic Republic of the Congo">{t('Democratic Republic of the Congo')}</SelectItem>
+                       
                       </SelectContent>
                     </Select>
                     {errors.country && <p className="text-sm text-red-500 mt-1">{errors.country}</p>}

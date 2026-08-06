@@ -31,7 +31,7 @@ class NotificationService
         $interview = $candidate->interviews()->orderBy('scheduled_date', 'desc')->orderBy('scheduled_time', 'desc')->first();
 
         return [
-            'candidate_name' => $candidate->full_name,
+            'candidate_name' => $candidate->first_name. ' '. $candidate->last_name,
             'first_name' => $candidate->first_name,
             'job_title' => $candidate->job?->title ?? 'N/A',
             'Job_title' => $candidate->job?->title ?? 'N/A',
