@@ -71,6 +71,7 @@ class NotificationTemplateController extends Controller
             'first_name',
             'job_title',
             'Job_title',
+            'contract_type',
             'application_date',
             'company_name',
             'candidate_email',
@@ -200,6 +201,7 @@ class NotificationTemplateController extends Controller
             'first_name',
             'job_title',
             'Job_title',
+            'contract_type',
             'application_date',
             'company_name',
             'candidate_email',
@@ -296,6 +298,7 @@ class NotificationTemplateController extends Controller
         $sampleData = [
             'candidate_name' => 'John Doe',
             'job_title' => 'Software Engineer',
+            'contract_type' => 'Permanent Full-time',
             'application_date' => now()->format('Y-m-d'),
             'company_name' => getSetting('titleText', 'Company'),
             'candidate_email' => 'john@example.com',

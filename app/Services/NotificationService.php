@@ -30,19 +30,51 @@ class NotificationService
 
         $interview = $candidate->interviews()->orderBy('scheduled_date', 'desc')->orderBy('scheduled_time', 'desc')->first();
 
+        // Resolve contract type from contract_types table
+        $contractType = null;
+        if (!empty($candidate->contract_type_id)) {
+            $contractType = \App\Models\ContractType::find($candidate->contract_type_id)?->name;
+        }
+
+        if (!$contractType && $candidate->job) {
+            if (!empty($candidate->job->contract_type_id)) {
+                $contractType = \App\Models\ContractType::find($candidate->job->contract_type_id)?->name;
+            } elseif (!empty($candidate->job->job_type_id)) {
+                $contractType = \App\Models\ContractType::find($candidate->job->job_type_id)?->name;
+            }
+
+            if (!$contractType && $candidate->job->jobType) {
+                $contractType = \App\Models\ContractType::where('name', $candidate->job->jobType->name)->value('name')
+                    ?? $candidate->job->jobType->name;
+            }
+        }
+
+        if (!$contractType) {
+            $user = \App\Models\User::where('email', $candidate->email)->first();
+            if ($user) {
+                $contract = \App\Models\EmployeeContract::where('employee_id', $user->id)
+                    ->with('contractType')
+                    ->latest()
+                    ->first();
+                $contractType = $contract?->contractType?->name;
+            }
+        }
+
         return [
             'candidate_name' => $candidate->first_name. ' '. $candidate->last_name,
             'first_name' => $candidate->first_name,
             'job_title' => $candidate->job?->title ?? 'N/A',
             'Job_title' => $candidate->job?->title ?? 'N/A',
-            'application_date' => $candidate->application_date?->format('Y-m-d') ?? now()->format('Y-m-d'),
+            'contract_type' => $contractType ?? 'N/A',
+            'Contract_type' => $contractType ?? 'N/A',
+            'application_date' => $candidate->application_date?->format('d-m-Y') ?? now()->format('d-m-Y'),
             'company_name' => getSetting('titleText', 'Company'),
             'candidate_email' => $candidate->email,
             'candidate_phone' => $candidate->phone ?? 'N/A',
             'department' => $candidate->department?->name ?? ($offer?->department?->name ?? 'N/A'),
 
             // Offer related
-            'start_date' => $offer?->start_date?->format('Y-m-d') ?? 'N/A',
+            'start_date' => $offer?->start_date?->format('d-m-Y') ?? 'N/A',
             'manager_name' => $offer?->manager?->name ?? 'N/A',
             'salary' => $offer?->salary ?? 'N/A',
             'bonus' => $offer?->bonus ?? 'N/A',
@@ -52,8 +84,8 @@ class NotificationService
             'working_hours' => $offer?->working_hrs ?? 'N/A',
 
             // Interview related
-            'date' => $interview?->scheduled_date?->format('Y-m-d') ?? 'N/A',
-            'day' => $interview?->scheduled_date?->format('l') ?? 'N/A',
+            'date' => $interview?->scheduled_date?->format('d-m-Y') ?? 'N/A',
+            'day' => $interview?->scheduled_date?->locale('fr')->translatedFormat('l') ?? 'N/A',
             'time' => $interview?->scheduled_time ?? 'N/A',
             'interview_type' => $interview?->interviewType?->name ?? 'N/A',
             'daration' => $interview?->duration ?? 'N/A',

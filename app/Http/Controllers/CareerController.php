@@ -401,7 +401,8 @@ class CareerController extends Controller
             $candidate->save();
 
             // Requirement 1: Trigger notification service with status_key 'new'
-            (new \App\Services\NotificationService())->sendApplicationConfirmation($candidate);
+            // Sends both email and WhatsApp notifications using the same template/parameters as sendByStatus
+            (new \App\Services\NotificationService())->sendByStatus($candidate, 'new');
 
             // Dispatch event to send application confirmation notifications
             // CandidateApplied::dispatch($candidate);

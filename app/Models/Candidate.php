@@ -100,6 +100,11 @@ class Candidate extends BaseModel
         return $this->belongsTo(JobType::class, 'job_type_id');
     }
 
+    public function contractType()
+    {
+        return $this->belongsTo(ContractType::class, 'contract_type_id');
+    }
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
